@@ -1,0 +1,64 @@
+from collections.abc import Sequence
+from itertools import chain
+from pathlib import Path
+
+from loguru import logger
+from pypdf import PageObject, PdfReader, PdfWriter
+
+
+def pdf_merge(pdfs: Sequence[Path], *, dedup: bool = True) -> PdfWriter:
+    """Merge multiple PDF files into a single PDF.
+
+    Args:
+        pdfs (Sequence[Path]): A sequence of file paths pointing to PDF files.
+        dedup (bool, optional): Whether to remove duplicate PDF files. Defaults to True.
+
+    Returns:
+        PdfWriter: A PdfWriter object representing the merged PDF.
+
+    Raises:
+        ValueError: If no PDF paths are recognized.
+    """
+    logger.debug(f'Initial requests PDF paths: {", ".join(str(pdf) for pdf in pdfs)}')
+    merger = PdfWriter()
+
+    parsed_pdf = chain.from_iterable(
+        pdf.absolute().parent.glob(pdf.absolute().name) or [pdf] for pdf in pdfs
+    )
+
+    parsed_pdf = set(parsed_pdf) if dedup else list(parsed_pdf)
+
+    if not len(parsed_pdf):
+        msg = 'No PDF paths recognized.'
+        raise ValueError(msg)
+
+    logger.debug(f'Expanded PDF paths: {", ".join(str(pdf) for pdf in parsed_pdf)}')
+
+    for pdf in parsed_pdf:
+        logger.debug(f'{pdf} getting added for merging.')
+        merger.append(pdf)
+
+    return merger
+
+
+def pdf_split(filename: Path) -> list[PageObject]:
+    """Split a PDF file into individual pages.
+
+    Args:
+        filename (Path): The path to the PDF file.
+
+    Returns:
+        list[PageObject]: A list of PageObject representing the individual pages of the PDF.
+    """
+    writer = PdfReader(filename)
+    return writer.pages
+
+
+def save(obj: PdfWriter, output: str | Path) -> None:
+    """Save the PdfWriter object to the specified output file or path.
+
+    Args:
+        obj (PdfWriter): The PdfWriter object to be saved.
+        output (str | Path): The output file or path where the PdfWriter object will be saved.
+    """
+    obj.write(output)

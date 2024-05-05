@@ -1,0 +1,21 @@
+[project]
+name = "pdfcli"
+description = "PDF utility from command line"
+readme = "README.md"
+requires-python = ">=3.10"
+version = "0.1"
+authors = [{ name = "Moise Medici", email = "moise.medici@gmail.com" }]
+dependencies = [
+    "pypdf",
+    "typer"]
+
+[project.optional-dependencies]
+dev = [
+    "pytest>=7.4.2",
+    "pytest-cov>=4.1.0",
+    "pytest-mock>=3.11.1",
+    "ruff",
+    "loguru"]
+
+[project.scripts]
+pdfcli = "pdfcli.app:app"
