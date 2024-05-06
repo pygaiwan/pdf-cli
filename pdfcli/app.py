@@ -51,7 +51,7 @@ def split(
         writer = PdfWriter()
 
         writer.add_page(obj)
-        save(writer, output=output / f'{str(i).zfill(len(str(len(objs))))}_{name_suffix}.pdf')
+        save(writer, output=output / f'{i}:0{len(str(len(objs)))}_{name_suffix}.pdf')
 
 
 if __name__ == '__main__':
