@@ -8,7 +8,7 @@ from pypdf import PdfWriter
 from pdfcli.utilities import pdf_merge, pdf_split, save
 
 date = str(datetime.now()).translate(str.maketrans(':- ', '___')).split('.')[0]
-DEFAULT_PATH = Path(__file__).parent
+DEFAULT_PATH = Path.cwd()
 DEFAULT_MERGE = DEFAULT_PATH / f'{date}_merged.pdf'
 
 app = typer.Typer(rich_markup_mode='rich')
@@ -16,18 +16,9 @@ app = typer.Typer(rich_markup_mode='rich')
 
 @app.command()
 def merge(
-    filenames: Annotated[
-        Optional[list[Path]],
-        typer.Argument(help='Use if you have multiple path or glob with different paths.'),
-    ] = None,
-    expr: Annotated[
-        Optional[Path],
-        typer.Option(
-            help="""
-            Use --expr if you have a only one glob to expand, for example [code]sample*.pdf[/code].
-            If more than one glob is needed, use the filenames argument."""
-        ),
-    ] = None,
+    filenames: list[Path] = typer.Argument(  # noqa: B008
+        help='Use if you have multiple path or glob with different paths.'
+    ),
     output: Annotated[
         Path, typer.Option(help='The path to the output merged PDF file.')
     ] = DEFAULT_MERGE,
@@ -37,9 +28,7 @@ def merge(
     ] = True,
 ) -> None:
     """Merge multiple PDF files into a single PDF file."""
-    expr = [expr] if expr else []
     filenames = filenames if filenames else []
-    filenames.extend(expr)
     obj = pdf_merge(filenames, dedup=dedup)
     save(obj, output)
 
@@ -62,8 +51,8 @@ def split(
         writer = PdfWriter()
 
         writer.add_page(obj)
-        save(writer, output=output / f'{i}_{name_suffix}.pdf')
+        save(writer, output=output / f'{str(i).zfill(len(str(len(objs))))}_{name_suffix}.pdf')
 
 
 if __name__ == '__main__':
-    app()
+    app()  # pragma: no cover

@@ -1,5 +1,4 @@
 from collections.abc import Sequence
-from itertools import chain
 from pathlib import Path
 
 from loguru import logger
@@ -19,22 +18,19 @@ def pdf_merge(pdfs: Sequence[Path], *, dedup: bool = True) -> PdfWriter:
     Raises:
         ValueError: If no PDF paths are recognized.
     """
-    logger.debug(f'Initial requests PDF paths: {", ".join(str(pdf) for pdf in pdfs)}')
-    merger = PdfWriter()
-
-    parsed_pdf = chain.from_iterable(
-        pdf.absolute().parent.glob(pdf.absolute().name) or [pdf] for pdf in pdfs
-    )
-
-    parsed_pdf = set(parsed_pdf) if dedup else list(parsed_pdf)
-
-    if not len(parsed_pdf):
+    if not pdfs:
         msg = 'No PDF paths recognized.'
         raise ValueError(msg)
 
-    logger.debug(f'Expanded PDF paths: {", ".join(str(pdf) for pdf in parsed_pdf)}')
+    pdfs = [pdfs] if isinstance(pdfs, Path) else pdfs
+    merger = PdfWriter()
 
-    for pdf in parsed_pdf:
+    if dedup:
+        seen = set()
+        pdfs = [seen.add(pdf) or pdf for pdf in pdfs if pdf not in seen]
+    logger.debug(f'Requests PDF paths: {", ".join(str(pdf) for pdf in pdfs)}')
+
+    for pdf in pdfs:
         logger.debug(f'{pdf} getting added for merging.')
         merger.append(pdf)
 

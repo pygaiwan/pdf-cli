@@ -10,8 +10,8 @@ def test_page_count(test_pdf):
 
 
 input_pdfs = [
-    ([STATIC_DIR / 'sample*.pdf', STATIC_DIR / 'example.pdf'], 3),
-    ([STATIC_DIR / 'sample*.pdf'], 2),
+    ([STATIC_DIR / 'sample_1.pdf', STATIC_DIR / 'sample_2.pdf', STATIC_DIR / 'example.pdf'], 3),
+    ([STATIC_DIR / 'sample_1.pdf', STATIC_DIR / 'sample_2.pdf'], 2),
     ([STATIC_DIR / 'example.pdf'], 1),
 ]
 
@@ -41,7 +41,7 @@ def test_split(merged_file):
 
 def test_save(tmp_path):
     out = tmp_path / 'output.pdf'
-    obj = pdf_merge([STATIC_DIR / 'sample*.pdf'])
+    obj = pdf_merge([STATIC_DIR / 'sample_1.pdf', STATIC_DIR / 'sample_2.pdf'])
     save(obj, out)
 
     assert out.exists

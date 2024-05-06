@@ -17,6 +17,7 @@ def test_pdf():
 @pytest.fixture()
 def output_file(tmp_path):
     out = tmp_path / 'out.pdf'
+    out = Path(__file__).parent / 'weird_test' / 'out.pdf'
     return out.as_posix()
 
 

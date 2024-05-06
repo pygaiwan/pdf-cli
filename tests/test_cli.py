@@ -1,6 +1,5 @@
 from pathlib import Path
 
-import pytest
 from conftest import STATIC_DIR
 from typer.testing import CliRunner
 
@@ -8,15 +7,11 @@ from pdfcli.app import app
 
 runner = CliRunner()
 
-input_pdfs = [
-    STATIC_DIR / 'example.pdf',
-    STATIC_DIR / 'sample*.pdf',
-]
 
-
-@pytest.mark.parametrize('input_pdf', input_pdfs)
-def test_merge_file_single_input(output_file, input_pdf):
-    result = runner.invoke(app, ['merge', '--expr', input_pdf.as_posix(), '--output', output_file])
+def test_merge_file_single_input(output_file):
+    result = runner.invoke(
+        app, ['merge', (STATIC_DIR / 'example.pdf').as_posix(), '--output', output_file]
+    )
     assert result.exit_code == 0
     assert Path(output_file).exists
     assert Path(output_file).stat().st_size
@@ -24,19 +19,12 @@ def test_merge_file_single_input(output_file, input_pdf):
 
 def test_merge_file_multiple_input(output_file):
     in1 = (STATIC_DIR / 'example.pdf').as_posix()
-    in2 = (STATIC_DIR / 'sample*.pdf').as_posix()
-    result = runner.invoke(app, ['merge', in1, in2, '--output', output_file])
+    in2 = (STATIC_DIR / 'sample_1.pdf').as_posix()
+    in3 = (STATIC_DIR / 'sample_2.pdf').as_posix()
+    result = runner.invoke(app, ['merge', in1, in2, in3, '--output', output_file])
     assert result.exit_code == 0
     assert Path(output_file).exists
     assert Path(output_file).stat().st_size
-
-
-def test_merge_different_input(output_file):
-    in1 = (STATIC_DIR / 'example.pdf').as_posix()
-    in2 = (STATIC_DIR / 'sample*.pdf').as_posix()
-    result = runner.invoke(app, ['merge', in1, in2, '--expr', in1, '--output', output_file])
-
-    assert result.exit_code == 0
 
 
 def test_split_file(merged_file, tmp_path):
@@ -45,4 +33,4 @@ def test_split_file(merged_file, tmp_path):
     )
 
     assert result.exit_code == 0
-    assert len(list(Path(tmp_path).glob('*.pdf'))) == 2
+    assert len(list(Path(tmp_path).glob('*.pdf'))) == 2  # noqa: PLR2004
